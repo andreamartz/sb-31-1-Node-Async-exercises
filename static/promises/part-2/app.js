@@ -15,7 +15,8 @@ $(function() {
   const CARDS_BASE_URL = "https://deckofcardsapi.com/api/deck";
 
 
-  $.getJSON(`${CARDS_BASE_URL}/new/draw/?count=1`, response => {
+  $.getJSON(`${CARDS_BASE_URL}/new/draw/?count=1`)
+  .then(response => {
     console.log(response);
     console.group("The card drawn was: ", response.cards[0].value, "of", response.cards[0].suit);
     $("body").append('<h2>Part 2: Deck of Cards</h2>')
@@ -27,21 +28,26 @@ $(function() {
 
   // Once you have both cards, console.log the values and suits of both cards.
 
-  $.getJSON(`${CARDS_BASE_URL}/new/draw/?count=1`, response => {
-    let firstCard=response.cards[0];
+  let firstCard;
+  let secondCard;
+  $.getJSON(`${CARDS_BASE_URL}/new/draw/?count=1`)
+  .then(response => {
+    firstCard=response.cards[0];
     let deckId=response.deck_id;
     console.log(response);
     console.log("The first card drawn was: ", firstCard.value, "of", firstCard.suit);
-    $.getJSON(`${CARDS_BASE_URL}/${deckId}/draw/?count=1`, response => {
-      let secondCard=response.cards[0];
-      [firstCard, secondCard].forEach(card => {
-        console.log(`Card drawn: ${card.value} of ${card.suit}`);
-      });
-      $("body").append('<h3>2. Shuffle deck and draw two cards.</h3>')
-      $("body").append(`<p>The first card drawn was the ${firstCard.value} of ${firstCard.suit}.</p>
-      <p>The second card drawn was the ${secondCard.value} of ${secondCard.suit}.</p>`);
-    })
+    return($.getJSON(`${CARDS_BASE_URL}/${deckId}/draw/?count=1`));
+  })
+  .then(response => {
+    secondCard=response.cards[0];
+    [firstCard, secondCard].forEach(card => {
+      console.log(`Card drawn: ${card.value} of ${card.suit}`);
+    });
+    $("body").append('<h3>2. Shuffle deck and draw two cards.</h3>')
+    $("body").append(`<p>The first card drawn was the ${firstCard.value} of ${firstCard.suit}.</p>
+    <p>The second card drawn was the ${secondCard.value} of ${secondCard.suit}.</p>`);
   });
+
 
   // 3. Build an HTML page that lets you draw cards from a deck. When the page loads, go to the Deck of Cards API to create a new deck, and show a button on the page that will let you draw a card. Every time you click the button, display a new card, until there are no cards left in the deck.
 
@@ -50,14 +56,16 @@ $(function() {
   const $displayCard = $('#display-card');
   const $btn = $('button');
 
-  $.getJSON(`${CARDS_BASE_URL}/new/shuffle/?deck_count=1`, response => {
+  $.getJSON(`${CARDS_BASE_URL}/new/shuffle/?deck_count=1`)
+  .then(response => {
     console.log(response);
     deckId = response.deck_id;
-    $btn.show()
+    $btn.show();
   });
 
   $btn.on('click', function() {
-    $.getJSON(`${CARDS_BASE_URL}/${deckId}/draw/?count=1`, response => {
+    $.getJSON(`${CARDS_BASE_URL}/${deckId}/draw/?count=1`)
+    .then(response => {
       $card = response.cards[0];
       $cardURL = $card.image;
       $cardValue = $card.value;
@@ -66,7 +74,6 @@ $(function() {
       let randomX = Math.random() * 40 - 20;
       let randomY = Math.random() * 40 - 20;
       console.log(response, $cardValue, "of", $cardSuit, "from deck: ", deckId);
-
       $cardImg = $("<img>").attr('src', `${$cardURL}`);
       $displayCard.append(
         $($cardImg, {
@@ -78,7 +85,7 @@ $(function() {
     });
   });
 
-  // solution code for #3 - DOES NOT WORK LIKE THE ANIMATION SHOWN ON ASSIGNMENT
+  // solution code - DOES NOT WORK LIKE THE ANIMATION SHOWN ON ASSIGNMENT
   // let deckId = null;
   // let $btn = $('button');
   // let $cardArea = $('#card-area');
